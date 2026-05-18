@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lunar Space — Premium Hair, Nail & Lashes Studio Prague</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --ls-platinum-light: #e5e4e1; /* Platinum light */
+      --ls-platinum-base: #e5e4e2; /* Platinum base */
+      --ls-platinum-dark: #d0ced1; /* Platinum dark */
+      --ls-cyan-glow: #00f2fe;      /* Cosmic Cyan */
+      --ls-cyan-alt: #87ceeb;       /* Sky Blue */
+      --ls-deep-space: #08080c;
+      --ls-nebula-surface: #121218;
+      --ls-galaxy-surface: #1a1a20;
+      --text-primary: #f0f4f8;
+      --text-muted: #a0a0b0;
+      --glass-bg: rgba(255, 255, 255, 0.07); /* Subtle platinum glass */
+      --glass-border: rgba(0, 242, 254, 0.2); /* Cyan border */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      color-scheme: dark;
+    }
+
+    body {
+      background-color: var(--ls-deep-space);
+      color: var(--text-primary);
+      font-family: 'Orbitron', sans-serif, 'Playfair Display', serif; /* Futuristic font */
+      overflow-x: hidden;
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+    }
+
+    /* WebGL Container */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #canvas-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      background: transparent;
+    }
+
+    .content-layer {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Navbar */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 20px 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,8,12,0.6);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-bottom: 1px solid var(--glass-border);
+      transition: all 0.4s ease;
+    }
+
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, var(--ls-platinum-light) 0%, var(--ls-cyan-glow) 30%, var(--ls-platinum-base) 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Cinzel Decorative', cursive;
+    }
+
+    .logo-sub {
+      font-size: 0.5rem;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 3px;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif; /* Use Orbitron for consistency */
+    }
+
+    .lang-switcher {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .lang-btn {
+      padding: 8px 17px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 1px solid var(--glass-border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+    }
+
+    .lang-btn:hover, .lang-btn.active {
+      background: var(--ls-cyan-glow);
+      color: var(--ls-deep-space); /* Dark text on cyan */
+      border-color: var(--ls-cyan-glow);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+    }
+
+    /* Sections */
+    section {
+      min-height: 100vh;
+      position: relative;
+      padding: 120px 50px 80px;
+      overflow: hidden;
+    }
+
+    #hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 100vh;
+      padding-top: 120px;
+      padding-bottom: 80px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.3s;
+    }
+
+    .hero-title {
+      font-size: clamp(4rem, 10vw, 8.5rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--ls-platinum-light) 0%, var(--ls-cyan-glow) 40%, var(--text-primary) 60%, var(--ls-platinum-base) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.6s;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      max-width: 520px;
+      margin: 0 auto 48px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 0.9s;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 17px 44px;
+      background: linear-gradient(135deg, var(--ls-platinum-base), var(--ls-cyan-alt));
+      color: var(--ls-deep-space); /* Dark text on cyan/platinum gradient */
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 1.2s;
+      text-decoration: none;
+      box-shadow: 0 20px 50px rgba(0, 242, 254, 0.15); /* Soft cyan shadow */
+    }
+
+    .cta-btn:hover {
+      color: var(--text-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 30px 70px rgba(0, 242, 254, 0.25); /* Stronger cyan shadow */
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 1.2s ease forwards 2s;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--ls-cyan-glow), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    .scroll-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.35em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Particle canvas */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Matrix Overlay Canvas */
+    #matrix-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    /* Data pulse labels */
+    .data-pulse {
+      position: fixed;
+      font-size: 0.65rem;
+      letter-spacing: 0.28em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      white-space: nowrap;
+      text-shadow: 0 0 15px rgba(0, 242, 254, 0.6); /* Cosmic cyan glow */
+    }
+
+    /* Services Section */
+    #services {
+      min-height: 200vh;
+      padding: 0;
+    }
+
+    .services-header {
+      padding: 120px 50px 80px;
+      text-align: center;
+      position: relative;
+      z-index: 12;
+    }
+
+    .section-eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.38em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--ls-platinum-base), var(--text-primary), var(--ls-platinum-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+    }
+
+    .bento-wrapper {
+      padding: 0 50px 120px;
+      will-change: transform;
+      position: relative;
+      z-index: 12;
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 30px; /* Increased gap */
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .bento-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 45px 40px;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+      cursor: default;
+      will-change: transform;
+      overflow: hidden;
+      position: relative;
+      border-radius: 12px; /* More rounded corners */
+      box-shadow: 0 10px 30px rgba(0, 242, 254, 0.05); /* Subtle cyan glow shadow */
+    }
+
+    .bento-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px; /* Thicker accent line */
+      background: linear-gradient(90deg, transparent, var(--ls-cyan-glow), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .bento-card:hover::before { opacity: 1; }
+
+    .bento-card:hover {
+      box-shadow: 0 50px 120px rgba(0, 242, 254, 0.25); /* Stronger Neon cyan shadow */
+      border-color: rgba(0, 242, 254, 0.4); /* Brighter cyan border */
+      transform: translateY(-8px); /* More lift on hover */
+    }
+
+    .bento-card.large {
+      grid-column: span 2;
+    }
+
+    .bento-card.tall {
+      grid-row: span 2;
+    }
+
+    .card-number {
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 25px;
+      opacity: 0.8;
+    }
+
+    .card-icon {
+      font-size: 3.2rem;
+      margin-bottom: 25px;
+      display: block;
+      color: var(--ls-platinum-base); /* Default icon color */
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive;
+      line-height: 1;
+      text-shadow: 0 0 15px rgba(100, 230, 255, 0.4); /* Soft cyan glow */
+    }
+
+    .card-title {
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      line-height: 1.2;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      filter: blur(5px);
+      transition: filter 0.6s ease;
+    }
+
+    .bento-card:hover .card-desc {
+      filter: blur(0);
+    }
+
+    .card-price {
+      margin-top: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 25px;
+      border: 1px solid var(--glass-border);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      background: rgba(0, 242, 254, 0.05);
+      border-radius: 6px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .tag {
+      padding: 5px 14px;
+      background: rgba(229, 228, 225, 0.1); /* Subtle platinum background */
+      border: 1px solid rgba(229, 228, 225, 0.3);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--ls-platinum-dark);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      border-radius: 4px;
+    }
+
+    /* About / Manifesto Section */
+    #about {
+      padding: 130px 50px;
+      max-width: 1280px;
+      margin: 0 auto;
+      background: var(--ls-nebula-surface);
+    }
+
+    .manifesto-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px; /* Increased gap */
+      align-items: center;
+    }
+
+    .manifesto-text h2 {
+      font-size: clamp(2.4rem, 4.8vw, 4.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, var(--ls-cyan-glow), var(--text-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .manifesto-text p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.9;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .stat-item {
+      padding: 35px; /* Slightly larger padding */
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 8px; /* Rounded corners */
+      box-shadow: 0 12px 35px rgba(0, 242, 254, 0.08); /* Soft cyan shadow */
+    }
+    .stat-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 30px 70px rgba(0, 242, 254, 0.2); /* Stronger cyan shadow */
+    }
+
+    .stat-number {
+      font-size: 3.5rem; /* Larger numbers */
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--ls-cyan-glow), var(--ls-cyan-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 12px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+    }
+
+    /* Specialists Section */
+    #specialists {
+      padding: 130px 50px;
+      background: var(--ls-galaxy-surface);
+    }
+
+    .specialists-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 35px; /* Larger gap */
+      max-width: 1280px;
+      margin: 70px auto 0;
+    }
+
+    .specialist-card {
+      background: var(--ls-nebula-surface); /* Darker surface */
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 15px 40px rgba(0, 242, 254, 0.08); /* Subtle cyan shadow */
+    }
+
+    .specialist-card:hover {
+      transform: translateY(-12px); /* More pronounced lift */
+      box-shadow: 0 55px 100px rgba(0, 242, 254, 0.25); /* Stronger cyan shadow */
+    }
+
+    .specialist-avatar {
+      width: 100%;
+      height: 300px; /* Taller avatars */
+      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a24 50%, #1a1a1a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .specialist-avatar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(0, 242, 254, 0.18) 0%, transparent 70%); /* Cosmic cyan radial glow */
+    }
+
+    .avatar-initials {
+      font-size: 4rem; /* Larger initials */
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--ls-cyan-glow), var(--ls-cyan-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      z-index: 1;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border: 1px solid rgba(0, 242, 254, 0.28);
+      border-radius: 50%;
+      animation: ringPulse 3s ease-in-out infinite;
+    }
+
+    .avatar-ring:nth-child(2) {
+      width: 140px;
+      height: 140px;
+      animation-delay: 0.8s;
+      opacity: 0.5;
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.05); opacity: 0.7; }
+    }
+
+    .specialist-info {
+      padding: 35px 35px 40px; /* More padding */
+    }
+
+    .specialist-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .specialist-role {
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    .specialist-bio {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 26px;
+    }
+
+    .specialist-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .skill-tag {
+      padding: 5px 14px;
+      background: rgba(0, 242, 254, 0.05);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--ls-cyan-alt);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      border-radius: 4px;
+    }
+
+    /* Location Section */
+    #location {
+      padding: 130px 50px;
+      background: var(--ls-deep-space);
+    }
+
+    .location-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr; /* Wider map area */
+      gap: 80px; /* Larger gap */
+      max-width: 1280px;
+      margin: 70px auto 0;
+      align-items: start;
+    }
+
+    .location-info h3 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 30px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .location-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px; /* Larger gap */
+      padding: 28px 0;
+      border-bottom: 1px solid var(--glass-border);
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+    }
+
+    .location-detail-icon {
+      font-size: 1.3rem; /* Larger icons */
+      color: var(--ls-cyan-glow);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .location-detail-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .location-detail-value {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    .map-container {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 15px 40px rgba(0, 242, 254, 0.1); /* Soft cyan glow shadow */
+    }
+
+    .map-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 5;
+      border-radius: 10px;
+    }
+
+    .map-container iframe {
+      display: block;
+      width: 100%;
+      height: 480px; /* Taller map */
+      border: 0;
+      filter: invert(95%) sepia(5%) saturate(10%) hue-rotate(180deg) brightness(95%) contrast(90%); /* Dark / Platinum theme */
+    }
+
+    /* Footer */
+    #footer {
+      background: var(--ls-deep-space);
+      border-top: 1px solid var(--glass-border);
+      padding: 100px 50px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 80px; /* Wider gap */
+      max-width: 1280px;
+      margin: 0 auto 70px;
+    }
+
+    .footer-brand p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      line-height: 1.8;
+      margin-top: 20px;
+      max-width: 320px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.75rem;
+      letter-spacing: 0.45em;
+      color: var(--ls-cyan-glow);
+      text-transform: uppercase;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 28px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 16px; /* More spacing */
+    }
+
+    .footer-col ul li a {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      transition: color 0.3s ease;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--ls-cyan-glow);
+    }
+
+    .footer-bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 40px; /* More padding */
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      letter-spacing: 0.1em;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 20px; /* More spacing */
+    }
+
+    .social-link {
+      width: 45px;
+      height: 45px;
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      border-radius: 50%;
+    }
+
+    .social-link:hover {
+      border-color: var(--ls-cyan-glow);
+      color: var(--ls-cyan-glow);
+      background: rgba(0, 242, 254, 0.08);
+    }
+
+    /* Lunar Space Dividers */
+    .ls-divider {
+      width: 80px; /* Wider divider */
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--ls-cyan-glow), transparent);
+      margin: 0 auto 40px;
+    }
+
+    /* Reveal animation classes */
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Booking CTA strip */
+    .booking-strip {
+      background: linear-gradient(135deg, rgba(8,8,12,0.05) 0%, rgba(0,242,254,0.05) 100%);
+      border-top: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 80px 50px; /* Larger padding */
+      text-align: center;
+    }
+
+    .booking-strip h3 {
+      font-size: clamp(1.8rem, 3.8vw, 3.0rem);
+      background: linear-gradient(135deg, var(--ls-cyan-glow), var(--ls-cyan-alt));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      font-family: 'Playfair Display', serif, 'Cinzel Decorative', cursive, 'Orbitron', sans-serif;
+    }
+
+    .booking-strip p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-family: 'Orbitron', sans-serif, 'Quicksand', sans-serif;
+      margin-bottom: 45px;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 900px) {
+      #navbar { padding: 18px 28px; }
+      .bento-grid { grid-template-columns: 1fr; gap: 20px; }
+      .bento-card.large, .bento-card.tall { grid-column: span 1; grid-row: span 1; }
+      .specialists-grid { grid-template-columns: 1fr; gap: 25px; }
+      .manifesto-layout { grid-template-columns: 1fr; gap: 50px; }
+      .location-layout { grid-template-columns: 1fr; gap: 50px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      section { padding: 100px 28px 60px; }
+      .services-header, .bento-wrapper { padding-left: 28px; padding-right: 28px; }
+      .booking-strip, .footer-bottom { padding-left: 28px; padding-right: 28px; }
+      .hero-title { font-size: clamp(3rem, 10vw, 6rem); }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Playfair+Display:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Matrix Overlay Canvas -->
+  <canvas id="matrix-overlay"></canvas>
+
+  <!-- Data Pulse Labels -->
+  <div class="data-pulse" id="pulse-1">LUNAR NAILS</div>
+  <div class="data-pulse" id="pulse-2">LASH DESIGN</div>
+  <div class="data-pulse" id="pulse-3">COSMIC HAIR</div>
+  <div class="data-pulse" id="pulse-4">LUNAR SPACE</div>
+  <div class="data-pulse" id="pulse-5">ŠTEFÁNIKOVA 28</div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <div>
+      <div class="logo-text">LUNAR SPACE</div>
+      <div class="logo-sub">HAIR · NAIL · LASH</div>
+    </div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('cz')">CZ</button>
+      <button class="lang-btn" onclick="setLang('ru')">RU</button>
+    </div>
+  </nav>
+
+  <!-- CONTENT LAYER -->
+  <div class="content-layer">
+
+    <!-- HERO -->
+    <section id="hero">
+      <div class="hero-eyebrow" data-i18n="hero_eyebrow">Beyond Beauty Standards</div>
+      <h1 class="hero-title" data-i18n="hero_title">LUNAR SPACE<br/>PRAGUE</h1>
+      <p class="hero-subtitle" data-i18n="hero_sub">Experience the future of beauty—where style meets cosmic elegance.</p>
+      <a href="#services" class="cta-btn" data-i18n="hero_cta">
+        Explore Our Galaxy →
+      </a>
+      <div class="scroll-indicator">
+        <div class="scroll-line"></div>
+        <div class="scroll-label" data-i18n="scroll">Scroll</div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services">
+      <div class="services-header reveal-up">
+        <div class="section-eyebrow" data-i18n="services_eyebrow">Our Celestial Offerings</div>
+        <h2 class="section-title" data-i18n="services_title">Premium Beauty Services</h2>
+        <div class="ls-divider"></div>
+        <p class="section-desc" data-i18n="services_desc">Discover transformative services in hair, nails, and lashes, crafted with artistry and precision.</p>
+      </div>
+
+      <div class="bento-wrapper" id="bento-wrapper">
+        <div class="bento-grid" id="bento-grid">
+
+          <!-- Card 1: Haircut & Styling - Large -->
+          <div class="bento-card large" data-tilt>
+            <div class="card-number">01 — Hair</div>
+            <span class="card-icon">✂️</span>
+            <h3 class="card-title" data-i18n="card1_title">Advanced Haircut & Styling</h3>
+            <p class="card-desc" data-i18n="card1_desc">From precision cuts to avant-garde styles, our stylists sculpt hair into works of art. Experience personalized looks that enhance your unique essence.</p>
+            <div class="card-tags">
+              <span class="tag">Precision Cuts</span>
+              <span class="tag">Coloring</span>
+              <span class="tag">Styling</span>
+              <span class="tag">Treatments</span>
+            </div>
+            <div class="card-price">From 1,500 CZK</div>
+          </div>
+
+          <!-- Card 2: Nail Architecture - Tall -->
+          <div class="bento-card tall" data-tilt>
+            <div class="card-number">02 — Nails</div>
+            <span class="card-icon">💎</span>
+            <h3 class="card-title" data-i18n="card2_title">Bespoke Nail Architecture</h3>
+            <p class="card-desc" data-i18n="card2_desc">Crafting flawless nails with the precision of cosmic alignment. Our nail artists design extensions, sculptures, and art that defy gravity and expectation.</p>
+            <div class="card-tags">
+              <span class="tag">Gel Sculpture</span>
+              <span class="tag">Extensions</span>
+              <span class="tag">3D Art</span>
+              <span class="tag">Chrome Finish</span>
+            </div>
+            <div class="card-price">From 1,300 CZK</div>
+          </div>
+
+          <!-- Card 3: Lash Extensions -->
+          <div class="bento-card" data-tilt>
+            <div class="card-number">03 — Lashes</div>
+            <span class="card-icon">✨</span>
+            <h3 class="card-title" data-i18n="card3_title">Luxury Lash Extensions</h3>
+            <p class="card-desc" data-i18n="card3_desc">Define your gaze with our exquisite lash extensions. Achieve captivating volume and length, tailored to your desired cosmic allure.</p>
+            <div class="card-tags">
+              <span class="tag">Volume Lashes</span>
+              <span class="tag">Classic Sets</span>
+              <span class="tag">Hybrid Sets</span>
+              <span class="tag">Lash Lifts</span>
+            </div>
+            <div class="card-price">From 1,800 CZK</div>
+          </div>
+
+          <!-- Card 4: Advanced Hair Color -->
+          <div class="bento-card" data-tilt>
+            <div class="card-number">04 — Hair Color</div>
+            <span class="card-icon">🌈</span>
+            <h3 class="card-title" data-i18n="card4_title">Cosmic Hair Coloring</h3>
+            <p class="card-desc" data-i18n="card4_desc">Explore a universe of color. From celestial balayage to vibrant hues, we create luminous hair color that shines brighter than a supernova.</p>
+            <div class="card-tags">
+              <span class="tag">Balayage</span>
+              <span class="tag">Ombre</span>
+              <span class="tag">Creative Color</span>
+              <span class="tag">Root Touch-up</span>
+            </div>
+            <div class="card-price">From 2,000 CZK</div>
+          </div>
+
+          <!-- Card 5: Nail Artistry -->
+          <div class="bento-card" data-tilt>
+            <div class="card-number">05 — Nail Art</div>
+            <span class="card-icon">🌌</span>
+            <h3 class="card-title" data-i18n="card5_title">Celestial Nail Artistry</h3>
+            <p class="card-desc" data-i18n="card5_desc">From subtle shimmer to intricate galaxy designs, our artists paint constellations and nebulae directly onto your nails. Absolute perfection, star-dusted.</p>
+            <div class="card-tags">
+              <span class="tag">Galaxy Design</span>
+              <span class="tag">Hand-Painted</span>
+              <span class="tag">Minimalist</span>
+              <span class="tag">Gems & Glitter</span>
+            </div>
+            <div class="card-price">From 1,600 CZK</div>
+          </div>
+
+          <!-- Card 6: Lash Styling -->
+          <div class="bento-card large" data-tilt>
+            <div class="card-number">06 — Lash Styling</div>
+            <span class="card-icon">🌟</span>
+            <h3 class="card-title" data-i18n="card6_title">Evolving Lash Styles</h3>
+            <p class="card-desc" data-i18n="card6_desc">Discover bespoke lash styles that captivate. We offer consultations to create a look that enhances your natural beauty, from subtle elegance to dramatic allure.</p>
+            <div class="card-tags">
+              <span class="tag">Custom Design</span>
+              <span class="tag">Lash Consultations</span>
+              <span class="tag">Fills & Refills</span>
+              <span class="tag">Lash Care Products</span>
+            </div>
+            <div class="card-price">From 1,000 CZK</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT / MANIFESTO -->
+    <section id="about">
+      <div class="manifesto-layout">
+        <div class="manifesto-text reveal-up">
+          <div class="section-eyebrow" data-i18n="about_eyebrow">Our Cosmic Philosophy</div>
+          <h2 data-i18n="about_title">The LUNAR SPACE Vision<br/>of Transformation</h2>
+          <p data-i18n="about_p1">LUNAR SPACE is where the frontiers of beauty are explored. We merge cutting-edge techniques with inspired artistry, creating styles that are as unique and radiant as the cosmos itself.</p>
+          <p data-i18n="about_p2">Located in the vibrant heart of Prague 5 at Štefánikova 28, our studio is your portal to unparalleled beauty transformation.</p>
+          <a href="#location" class="cta-btn" style="margin-top: 18px;" data-i18n="about_cta">Journey to Our Studio →</a>
+        </div>
+        <div class="stats-grid reveal-up">
+          <div class="stat-item">
+            <div class="stat-number">7+</div>
+            <div class="stat-label" data-i18n="stat1">Years in Orbit</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">15,000+</div>
+            <div class="stat-label" data-i18n="stat2">Transformations Created</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">25</div>
+            <div class="stat-label" data-i18n="stat3">Cosmic Artists</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">99.8%</div>
+            <div class="stat-label" data-i18n="stat4">Client Stardust</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPECIALISTS -->
+    <section id="specialists">
+      <div style="max-width:1280px; margin:0 auto;">
+        <div class="section-eyebrow reveal-up" data-i18n="spec_eyebrow" style="text-align:center;">Our Crew</div>
+        <h2 class="section-title reveal-up" data-i18n="spec_title">Meet Our Beauty Navigators</h2>
+        <div class="ls-divider"></div>
+        <p class="section-desc reveal-up" style="text-align:center;margin:0 auto 0;" data-i18n="spec_desc">Our team comprises master stylists, nail architects, and lash artisans dedicated to your cosmic radiance.</p>
+
+        <div class="specialists-grid">
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">AK</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Alex Knight</div>
+              <div class="specialist-role" data-i18n="spec1_role">Lead Hair Stylist & Visionary</div>
+              <p class="specialist-bio" data-i18n="spec1_bio">Alex pioneers hair transformations, blending technical mastery with an intuitive understanding of style. Known for bold cuts and stunning color creations.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Avant-Garde</span>
+                <span class="skill-tag">Color Master</span>
+                <span class="skill-tag">Luxury Cuts</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">EV</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Eva Vinter</div>
+              <div class="specialist-role" data-i18n="spec2_role">Nail Architect & Chrome Artist</div>
+              <p class="specialist-bio" data-i18n="spec2_bio">Eva sculpts nails into ethereal masterpieces. Her signature is the flawless chrome finish and intricate galaxy designs.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Sculpting</span>
+                <span class="skill-tag">Chrome Expert</span>
+                <span class="skill-tag">Galaxy Art</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">SL</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Sofia Luna</div>
+              <div class="specialist-role" data-i18n="spec3_role">Lash Design Specialist</div>
+              <p class="specialist-bio" data-i18n="spec3_bio">Sofia crafts mesmerizing lash looks, from natural enhancement to dramatic volume. Specializes in personalized lash mapping for perfect symmetry.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Volume Lashes</span>
+                <span class="skill-tag">Lash Mapping</span>
+                <span class="skill-tag">Hybrid Sets</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">MR</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Markus Rex</div>
+              <div class="specialist-role" data-i18n="spec4_role">Senior Hair Colorist</div>
+              <p class="specialist-bio" data-i18n="spec4_bio">Markus masters the art of color. He creates luminous balayage and vibrant, long-lasting colors that capture the light like distant stars.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Balayage</span>
+                <span class="skill-tag">Creative Color</span>
+                <span class="skill-tag">Blonde Specialist</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">JN</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Jana Novak</div>
+              <div class="specialist-role" data-i18n="spec5_role">Nail Art & 3D Designer</div>
+              <p class="specialist-bio" data-i18n="spec5_bio">Jana's intricate nail art is truly out of this world, featuring stunning 3D elements and detailed cosmic scenes.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">3D Art</span>
+                <span class="skill-tag">Hand-Painting</span>
+                <span class="skill-tag">Detailing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="specialist-card reveal-up">
+            <div class="specialist-avatar">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring"></div>
+              <div class="avatar-initials">PL</div>
+            </div>
+            <div class="specialist-info">
+              <div class="specialist-name">Petr Luna</div>
+              <div class="specialist-role" data-i18n="spec6_role">Lash Technician & Volume Expert</div>
+              <p class="specialist-bio" data-i18n="spec6_bio">Petr excels in creating full, voluminous lash sets that are both stunning and comfortable for everyday wear.</p>
+              <div class="specialist-skills">
+                <span class="skill-tag">Volume Sets</span>
+                <span class="skill-tag">Fills</span>
+                <span class="skill-tag">Lash Health</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOKING STRIP -->
+    <div class="booking-strip reveal-up">
+      <div class="section-eyebrow" data-i18n="booking_eyebrow">Illuminate Your Beauty</div>
+      <h3 data-i18n="booking_title">Book Your Lunar Space Experience</h3>
+      <p data-i18n="booking_desc">Embark on a journey of beauty. Reserve your appointment with our stellar team.</p>
+      <a href="tel:+420XXXXXXXXX" class="cta-btn" data-i18n="booking_cta">Cosmic Appointment →</a>
+    </div>
+
+    <!-- LOCATION / MAP -->
+    <section id="location">
+      <div style="max-width:1280px; margin: 0 auto;">
+        <div style="text-align:center;">
+          <div class="section-eyebrow reveal-up" data-i18n="loc_eyebrow">Our Prague Observatory</div>
+          <h2 class="section-title reveal-up" data-i18n="loc_title">LUNAR SPACE — Štefánikova</h2>
+          <div class="ls-divider"></div>
+        </div>
+
+        <div class="location-layout">
+          <div class="location-info reveal-up">
+            <h3 data-i18n="loc_address_title">Štefánikova 249/28<br/>Prague 5 — Smíchov</h3>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">◉</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_addr">Address</div>
+                <div class="location-detail-value">Štefánikova 249/28<br/>150 00 Praha 5-Smíchov,<br/>Czech Republic</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">◷</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_hours">Operating Hours</div>
+                <div class="location-detail-value" data-i18n="loc_hours_val">Mon–Fri: 9:00 – 19:00<br/>Saturday: 10:00 – 16:00<br/>Sunday: Closed</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">☎</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_phone">Contact</div>
+                <div class="location-detail-value">+420 XXX XXX XXX</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">✉</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_email">Inquiry</div>
+                <div class="location-detail-value">contact@lunara-space.cz</div>
+              </div>
+            </div>
+
+            <div class="location-detail">
+              <span class="location-detail-icon">⟲</span>
+              <div>
+                <div class="location-detail-title" data-i18n="loc_transport">Access</div>
+                <div class="location-detail-value" data-i18n="loc_transport_val">Tram 4, 6, 9, 10, 16, 21: Anděl (5 min walk)<br/>Metro B: Anděl (5 min walk)<br/>Parking: Nearby OC Nový Smíchov</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="map-container reveal-up">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2561.7737985!2d14.404756199999993!3d50.0722815!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470b94c5611f819d%3A0xa7d2a4e887e5e42!2sAN NAILS!5e0!3m2!1sen!2sau!4v1700000000000!5m2!1sen!2sau"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Lunar Space Location — Štefánikova 249/28, Praha 5"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-text" style="font-size:1.4rem;">LUNAR SPACE</div>
+          <div class="logo-sub">HAIR · NAIL · LASH</div>
+          <p data-i18n="footer_desc">Štefánikova 28, Prague 5. Where beauty is art and innovation is infinite.</p>
+        </div>
+        <div class="footer-col">
+          <h4 data-i18n="footer_services">Services</h4>
+          <ul>
+            <li><a href="#services" data-i18n="f_hair">Hair Styling</a></li>
+            <li><a href="#services" data-i18n="f_nails">Nail Architecture</a></li>
+            <li><a href="#services" data-i18n="f_lashes">Lash Extensions</a></li>
+            <li><a href="#services" data-i18n="f_color">Hair Color</a></li>
+            <li><a href="#services" data-i18n="f_nailart">Nail Art</a></li>
+            <li><a href="#services" data-i18n="f_lashart">Lash Design</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 data-i18n="footer_studio">Studio</h4>
+          <ul>
+            <li><a href="#about" data-i18n="f_vision">Our Vision</a></li>
+            <li><a href="#specialists" data-i18n="f_team">Our Crew</a></li>
+            <li><a href="#location" data-i18n="f_loc">Visit Us</a></li>
+            <li><a href="#" data-i18n="f_gallery">Gallery</a></li>
+            <li><a href="#" data-i18n="f_book">Bookings</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 data-i18n="footer_connect">Connect</h4>
+          <ul>
+            <li><a href="#" data-i18n="f_care">Beauty Tips</a></li>
+            <li><a href="#" data-i18n="f_contact">Contact</a></li>
+            <li><a href="#" data-i18n="f_privacy">Privacy</a></li>
+            <li><a href="#" data-i18n="f_terms">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-copy">© 2025 LUNAR SPACE s.r.o. — Prague. All rights reserved.</div>
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Instagram">IG</a>
+          <a href="#" class="social-link" aria-label="Pinterest">PT</a>
+          <a href="#" class="social-link" aria-label="Facebook">FB</a>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- end content-layer -->
+
+  <script>
+  // ============================================================
+  // LANGUAGE DICTIONARY
+  // ============================================================
+  const i18n = {
+    en: {
+      hero_eyebrow: "Beyond Beauty Standards",
+      hero_title: "LUNAR SPACE<br/>PRAGUE",
+      hero_sub: "Experience the future of beauty—where style meets cosmic elegance.",
+      hero_cta: "Explore Our Galaxy →",
+      scroll: "Scroll",
+      services_eyebrow: "Our Celestial Offerings",
+      services_title: "Premium Beauty Services",
+      services_desc: "Discover transformative services in hair, nails, and lashes, crafted with artistry and precision.",
+      card1_title: "Advanced Haircut & Styling",
+      card1_desc: "From precision cuts to avant-garde styles, our stylists sculpt hair into works of art. Experience personalized looks that enhance your unique essence.",
+      card2_title: "Bespoke Nail Architecture",
+      card2_desc: "Crafting flawless nails with the precision of cosmic alignment. Our nail artists design extensions, sculptures, and art that defy gravity and expectation.",
+      card3_title: "Luxury Lash Extensions",
+      card3_desc: "Define your gaze with our exquisite lash extensions. Achieve captivating volume and length, tailored to your desired cosmic allure.",
+      card4_title: "Cosmic Hair Coloring",
+      card4_desc: "Explore a universe of color. From celestial balayage to vibrant hues, we create luminous hair color that shines brighter than a supernova.",
+      card5_title: "Celestial Nail Artistry",
+      card5_desc: "From subtle shimmer to intricate galaxy designs, our artists paint constellations and nebulae directly onto your nails. Absolute perfection, star-dusted.",
+      card6_title: "Evolving Lash Styles",
+      card6_desc: "Discover bespoke lash styles that captivate. We offer consultations to create a look that enhances your natural beauty, from subtle elegance to dramatic allure.",
+      about_eyebrow: "Our Cosmic Philosophy",
+      about_title: "The LUNAR SPACE Vision<br/>of Transformation",
+      about_p1: "LUNAR SPACE is where the frontiers of beauty are explored. We merge cutting-edge techniques with inspired artistry, creating styles that are as unique and radiant as the cosmos itself.",
+      about_p2: "Located in the vibrant heart of Prague 5 at Štefánikova 28, our studio is your portal to unparalleled beauty transformation.",
+      about_cta: "Journey to Our Studio →",
+      stat1: "Years in Orbit", stat2: "Transformations Created", stat3: "Cosmic Artists", stat4: "Client Stardust",
+      spec_eyebrow: "Our Crew",
+      spec_title: "Meet Our Beauty Navigators",
+      spec_desc: "Our team comprises master stylists, nail architects, and lash artisans dedicated to your cosmic radiance.",
+      spec1_role: "Lead Hair Stylist & Visionary",
+      spec1_bio: "Alex pioneers hair transformations, blending technical mastery with an intuitive understanding of style. Known for bold cuts and stunning color creations.",
+      spec2_role: "Nail Architect & Chrome Artist",
+      spec2_bio: "Eva sculpts nails into ethereal masterpieces. Her signature is the flawless chrome finish and intricate galaxy designs.",
+      spec3_role: "Lash Design Specialist",
+      spec3_bio: "Sofia crafts mesmerizing lash looks, from natural enhancement to dramatic volume. Specializes in personalized lash mapping for perfect symmetry.",
+      spec4_role: "Senior Hair Colorist",
+      spec4_bio: "Markus masters the art of color. He creates luminous balayage and vibrant, long-lasting colors that capture the light like distant stars.",
+      spec5_role: "Nail Art & 3D Designer",
+      spec5_bio: "Jana's intricate nail art is truly out of this world, featuring stunning 3D elements and detailed cosmic scenes.",
+      spec6_role: "Lash Technician & Volume Expert",
+      spec6_bio: "Petr excels in creating full, voluminous lash sets that are both stunning and comfortable for everyday wear.",
+      booking_eyebrow: "Illuminate Your Beauty",
+      booking_title: "Book Your Lunar Space Experience",
+      booking_desc: "Embark on a journey of beauty. Reserve your appointment with our stellar team.",
+      booking_cta: "Cosmic Appointment →",
+      loc_eyebrow: "Our Prague Observatory",
+      loc_title: "LUNAR SPACE — Štefánikova",
+      loc_address_title: "Štefánikova 249/28<br/>Prague 5 — Smíchov",
+      loc_addr: "Address",
+      loc_hours: "Operating Hours",
+      loc_hours_val: "Mon–Fri: 9:00 – 19:00<br/>Saturday: 10:00 – 16:00<br/>Sunday: Closed",
+      loc_phone: "Contact",
+      loc_email: "Inquiry",
+      loc_transport: "Access",
+      loc_transport_val: "Tram 4, 6, 9, 10, 16, 21: Anděl (5 min walk)<br/>Metro B: Anděl (5 min walk)<br/>Parking: Nearby OC Nový Smíchov",
+      footer_desc: "Štefánikova 28, Prague 5. Where beauty is art and innovation is infinite.",
+      footer_services: "Services", footer_studio: "Studio", footer_connect: "Connect",
+      f_hair: "Hair Styling", f_nails: "Nail Architecture", f_lashes: "Lash Extensions",
+      f_color: "Hair Color", f_nailart: "Nail Art", f_lashart: "Lash Design",
+      f_vision: "Our Vision", f_team: "Our Crew", f_loc: "Visit Us",
+      f_gallery: "Gallery", f_book: "Bookings",
+      f_care: "Beauty Tips", f_contact: "Contact", f_privacy: "Privacy", f_terms: "Terms"
+    },
+    cz: {
+      hero_eyebrow: "Za hranice standardů krásy",
+      hero_title: "LUNAR SPACE<br/>PRAHA",
+      hero_sub: "Zažijte budoucnost krásy — kde se styl snoubí s kosmickou elegancí.",
+      hero_cta: "Prozkoumejte naši galaxii →",
+      scroll: "Scrollovat",
+      services_eyebrow: "Naše nebeské nabídky",
+      services_title: "Luxusní kosmetické služby",
+      services_desc: "Objevte transformační služby v oblasti vlasů, nehtů a řas, vytvořené s uměním a precizností.",
+      card1_title: "Pokročilé střihy a styling",
+      card1_desc: "Od precizních střihů po avantgardní styly, naši kadeřníci tvarují vlasy do uměleckých děl. Zažijte personalizované vzhledy, které podtrhnou vaši jedinečnou esenci.",
+      card2_title: "Zakázková architektura nehtů",
+      card2_desc: "Vytváření dokonalých nehtů s přesností kosmického zarovnání. Naši nehtoví umělci navrhují prodloužení, skulptury a umění, které vzdoruje gravitaci a očekáváním.",
+      card3_title: "Luxusní prodlužování řas",
+      card3_desc: "Definujte svůj pohled našimi dokonalými prodlouženími řas. Dosáhněte podmanivého objemu a délky, přizpůsobených vaší toužené kosmické přitažlivosti.",
+      card4_title: "Kosmické barvení vlasů",
+      card4_desc: "Prozkoumejte vesmír barev. Od nebeského balayage po zářivé odstíny, vytváříme zářivé barvy vlasů, které září jasněji než supernovy.",
+      card5_title: "Nebeské umění nehtů",
+      card5_desc: "Od jemného třpytu po složité galaktické vzory, naši umělci kreslí souhvězdí a mlhoviny přímo na vaše nehty. Absolutní dokonalost pozlacená hvězdami.",
+      card6_title: "Vyvíjející se styly řas",
+      card6_desc: "Objevte zakázkové styly řas, které uchvátí. Nabízíme konzultace pro vytvoření vzhledu, který podtrhne vaši přirozenou krásu, od jemné elegance po dramatické kouzlo.",
+      about_eyebrow: "Naše kosmická filozofie",
+      about_title: "Vize LUNAR SPACE<br/>transformace",
+      about_p1: "LUNAR SPACE je místem, kde se zkoumají hranice krásy. Spojujeme nejmodernější techniky s inspirovaným uměním a vytváříme styly, které jsou stejně jedinečné a zářivé jako samotný kosmos.",
+      about_p2: "Nacházíme se v živoucím srdci Prahy 5 na Štefánikově 28, naše studio je vaším portálem k nesrovnatelné proměně krásy.",
+      about_cta: "Vydejte se do našeho studia →",
+      stat1: "Let v oběžné dráze", stat2: "Vytvořených transformací", stat3: "Kosmičtí umělci", stat4: "Hvězdný prach klientů",
+      spec_eyebrow: "Náš tým",
+      spec_title: "Poznejte naše průvodce krásou",
+      spec_desc: "Náš tým tvoří mistři stylisté, architekti nehtů a umělci řas oddaní vaší kosmické záři.",
+      spec1_role: "Hlavní kadeřník a vizionář",
+      spec1_bio: "Alex je průkopníkem v transformaci vlasů, kombinuje technickou dokonalost s intuitivním pochopením stylu. Známý pro odvážné střihy a úžasné barevné kreace.",
+      spec2_role: "Architekt nehtů a chromový umělec",
+      spec2_bio: "Eva tvaruje nehty do éterických mistrovských děl. Její podpis je dokonalý chromový finiš a složité galaktické vzory.",
+      spec3_role: "Specialistka na design řas",
+      spec3_bio: "Sofia vytváří podmanivé vzhledy řas, od přirozeného zvýraznění po dramatický objem. Specializuje se na individuální mapování řas pro dokonalou symetrii.",
+      spec4_role: "Senior kadeřník pro barvení",
+      spec4_bio: "Markus ovládá umění barvy. Vytváří zářivé balayage a živé, dlouhotrvající barvy, které zachycují světlo jako vzdálené hvězdy.",
+      spec5_role: "Designérka nehtového umění a 3D",
+      spec5_bio: "Janiny složité nehtové umění je skutečně mimo tento svět, s úžasnými 3D prvky a detailními kosmickými scénami.",
+      spec6_role: "Technik řas a expert na objem",
+      spec6_bio: "Petr vyniká ve vytváření plných, objemných sad řas, které jsou krásné a pohodlné pro každodenní nošení.",
+      booking_eyebrow: "Rozjasněte svou krásu",
+      booking_title: "Rezervujte si svůj zážitek v LUNAR SPACE",
+      booking_desc: "Vydejte se na cestu krásy. Rezervujte si schůzku s naším hvězdným týmem.",
+      booking_cta: "Kosmická schůzka →",
+      loc_eyebrow: "Naše pražská observatoř",
+      loc_title: "LUNAR SPACE — Štefánikova",
+      loc_address_title: "Štefánikova 249/28<br/>Praha 5 — Smíchov",
+      loc_addr: "Adresa",
+      loc_hours: "Provozní doba",
+      loc_hours_val: "Po–Pá: 9:00 – 19:00<br/>Sobota: 10:00 – 16:00<br/>Neděle: Zavřeno",
+      loc_phone: "Kontakt",
+      loc_email: "Poptávka",
+      loc_transport: "Dostupnost",
+      loc_transport_val: "Tram 4, 6, 9, 10, 16, 21: Anděl (5 min pěšky)<br/>Metro B: Anděl (5 min pěšky)<br/>Parkování: Nedaleko OC Nový Smíchov",
+      footer_desc: "Štefánikova 28, Praha 5. Kde je krása uměním a inovace nekonečná.",
+      footer_services: "Služby", footer_studio: "Studio", footer_connect: "Spojení",
+      f_hair: "Střihy a styling vlasů", f_nails: "Architektura nehtů", f_lashes: "Prodloužení řas",
+      f_color: "Barvení vlasů", f_nailart: "Nail Art", f_lashart: "Design řas",
+      f_vision: "Naše vize", f_team: "Náš tým", f_loc: "Navštivte nás",
+      f_gallery: "Galerie", f_book: "Rezervace",
+      f_care: "Tipy pro krásu", f_contact: "Kontakt", f_privacy: "Soukromí", f_terms: "Podmínky"
+    },
+    ru: {
+      hero_eyebrow: "За гранью стандартов красоты",
+      hero_title: "LUNAR SPACE<br/>PRAGUE",
+      hero_sub: "Ощутите будущее красоты — где стиль встречается с космической элегантностью.",
+      hero_cta: "Исследуйте нашу галактику →",
+      scroll: "Прокрут",
+      services_eyebrow: "Наши космические предложения",
+      services_title: "Премиальные услуги красоты",
+      services_desc: "Откройте для себя преобразующие услуги в области волос, ногтей и ресниц, созданные с искусством и точностью.",
+      card1_title: "Продвинутая стрижка и укладка",
+      card1_desc: "От точных стрижек до авангардных стилей — наши стилисты воплощают волосы в произведения искусства. Ощутите индивидуальные образы, подчеркивающие вашу уникальную сущность.",
+      card2_title: "Авторская архитектура ногтей",
+      card2_desc: "Создание безупречных ногтей с точностью космического выравнивания. Наши нейл-мастера разрабатывают наращивания, скульптуры и арт-дизайны, бросающие вызов гравитации и ожиданиям.",
+      card3_title: "Роскошное наращивание ресниц",
+      card3_desc: "Определите свой взгляд с помощью наших изысканных наращиваний ресниц. Достигните завораживающего объема и длины, подобранных под ваше желаемое космическое очарование.",
+      card4_title: "Космическое окрашивание волос",
+      card4_desc: "Исследуйте вселенную цвета. От небесного балаяжа до ярких оттенков — мы создаем сияющие цвета волос, которые сияют ярче сверхновой.",
+      card5_title: "Небесный нейл-арт",
+      card5_desc: "От тонкого мерцания до замысловатых галактических дизайнов — наши мастера рисуют созвездия и туманности прямо на ваших ногтях. Абсолютное совершенство, приправленное звездами.",
+      card6_title: "Эволюция стилей ресниц",
+      card6_desc: "Откройте для себя уникальные стили ресниц, которые очаровывают. Мы предлагаем консультации для создания образа, подчеркивающего вашу природную красоту, от утонченной элегантности до драматического обаяния.",
+      about_eyebrow: "Наша Космическая Философия",
+      about_title: "Видение LUNAR SPACE<br/>преображения",
+      about_p1: "LUNAR SPACE — это место, где исследуются границы красоты. Мы сочетаем передовые техники с вдохновленным артистизмом, создавая стили, столь же уникальные и сияющие, как сам космос.",
+      about_p2: "Расположенная в оживленном центре Праги 5 на Штефаниковой 28, наша студия — ваш портал к непревзойденному преображению красоты.",
+      about_cta: "Отправляйтесь в нашу студию →",
+      stat1: "Лет на орбите", stat2: "Создано трансформаций", stat3: "Космических мастеров", stat4: "Звездная пыль клиентов",
+      spec_eyebrow: "Наша команда",
+      spec_title: "Познакомьтесь с нашими Навигаторами Красоты",
+      spec_desc: "Наша команда состоит из ведущих стилистов, архитекторов ногтей и мастеров ресниц, преданных вашему космическому сиянию.",
+      spec1_role: "Главный парикмахер и Визионер",
+      spec1_bio: "Алекс — пионер в области трансформации волос, сочетающий техническое мастерство с интуитивным пониманием стиля. Известен смелыми стрижками и потрясающими цветовыми решениями.",
+      spec2_role: "Архитектор ногтей и Мастер Хрома",
+      spec2_bio: "Ева создает изысканные шедевры на ногтях. Ее визитная карточка — безупречное хромированное покрытие и замысловатые галактические дизайны.",
+      spec3_role: "Специалист по дизайну ресниц",
+      spec3_bio: "София создает завораживающие образы ресниц, от естественного подчеркивания до драматического объема. Специализируется на индивидуальном картировании ресниц для идеальной симметрии.",
+      spec4_role: "Старший колорист",
+      spec4_bio: "Маркус — мастер искусства цвета. Он создает сияющий балаяж и яркие, долговечные цвета, которые улавливают свет, словно далекие звезды.",
+      spec5_role: "Дизайнер нейл-арта и 3D",
+      spec5_bio: "Замысловатый нейл-арт Яны поистине неземной, с потрясающими 3D-элементами и детальными космическими сценами.",
+      spec6_role: "Техник ресниц и Эксперт по объему",
+      spec6_bio: "Петр преуспевает в создании полных, объемных комплектов ресниц, которые одинаково эффектны и комфортны для повседневного ношения.",
+      booking_eyebrow: "Озарите свою красоту",
+      booking_title: "Забронируйте свой опыт LUNAR SPACE",
+      booking_desc: "Отправьтесь в путешествие красоты. Зарезервируйте визит у нашей звездной команды.",
+      booking_cta: "Космическая запись →",
+      loc_eyebrow: "Наша Пражская Обсерватория",
+      loc_title: "LUNAR SPACE — Štefánikova",
+      loc_address_title: "Štefánikova 249/28<br/>Прага 5 — Смихов",
+      loc_addr: "Адрес",
+      loc_hours: "Время работы",
+      loc_hours_val: "Пн–Пт: 9:00 – 19:00<br/>Суббота: 10:00 – 16:00<br/>Воскресенье: Выходной",
+      loc_phone: "Контакт",
+      loc_email: "Запрос",
+      loc_transport: "Доступ",
+      loc_transport_val: "Трамвай 4, 6, 9, 10, 16, 21: Anděl (5 мин пешком)<br/>Метро B: Anděl (5 мин пешком)<br/>Парковка: Рядом с OC Nový Smíchov",
+      footer_desc: "Štefánikova 28, Прага 5. Где красота — это искусство, а инновации — бесконечны.",
+      footer_services: "Услуги", footer_studio: "Студия", footer_connect: "Связь",
+      f_hair: "Стрижка и укладка", f_nails: "Архитектура ногтей", f_lashes: "Наращивание ресниц",
+      f_color: "Окрашивание волос", f_nailart: "Дизайн ногтей", f_lashart: "Дизайн ресниц",
+      f_vision: "Наше видение", f_team: "Наша команда", f_loc: "Посетите нас",
+      f_gallery: "Галерея", f_book: "Бронирование",
+      f_care: "Советы по красоте", f_contact: "Контакты", f_privacy: "Приватность", f_terms: "Условия"
+    }
+  };
+
+  let currentLang = 'en';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (i18n[lang] && i18n[lang][key]) {
+        el.innerHTML = i18n[lang][key];
+      }
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang);
+    });
+    document.documentElement.lang = lang;
+  }
+  
+  setLang(navigator.language.split('-')[0] || 'en');
+
+
+  // ============================================================
+  // THREE.JS WEBGL — LUNAR CHROME ENGINE SETUP
+  // ============================================================
+  (function initWebGL() {
+    const container = document.getElementById('canvas-container');
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x08080c, 0); // Deep space background
+    renderer.shadowMap.enabled = false;
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 4.6);
+
+    // Lunar Space Luxury Aesthetics Core Mesh
+    const geometry = new THREE.TorusKnotGeometry(1.2, 0.32, 180, 24, 2, 3);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xffffff, // White for maximum reflectivity
+      metalness: 1.0,  // Full metallic, like polished chrome
+      roughness: 0.02  // Extremely smooth, brilliant shine
+    });
+    const knotMesh = new THREE.Mesh(geometry, material);
+    knotMesh.position.set(0, 0, 0);
+    scene.add(knotMesh);
+
+    // Compensated Studio Lighting - Lunar Space Theme
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 5.0); // Bright White light for key reflections, like a star
+    dirLight1.position.set(6, 6, 6);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x00f2fe, 4.0); // Intense Cosmic Cyan Contour Rim Glow
+    dirLight2.position.set(-6, -2, -4);
+    scene.add(dirLight2);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Soft ambient fill, like nebulae glow
+    scene.add(ambientLight);
+
+    // Subtle fill light to enhance metallic luster
+    const fillLight = new THREE.DirectionalLight(0xe5e4e1, 2.8); // Platinum light
+    fillLight.position.set(0, -5, 4);
+    scene.add(fillLight);
+
+    // Mouse tracking dynamic rotation
+    let mouseX = 0, mouseY = 0;
+    let targetRotX = 0, targetRotY = 0;
+    let currentRotX = 0, currentRotY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2.0;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2.0;
+    });
+
+    // Scroll-based dynamic camera Z position & wireframe state
+    let cameraTargetZ = 4.6;
+    let isWireframeActive = false;
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const heroElement = document.getElementById('hero');
+      const servicesElement = document.getElementById('services');
+      const specialistsElement = document.getElementById('specialists');
+
+      if (!heroElement || !servicesElement || !specialistsElement) return;
+
+      const heroHeight = heroElement.offsetHeight;
+      const servicesSectionTop = servicesElement.offsetTop;
+      const servicesSectionHeight = servicesElement.offsetHeight;
+      const specialistsSectionTop = specialistsElement.offsetTop;
+
+      let scrollProgress = 0;
+      const heroScrollEnd = heroHeight * 0.6;
+      const servicesScrollStart = servicesSectionTop - window.innerHeight * 0.4;
+      const servicesScrollEnd = servicesSectionTop + servicesSectionHeight * 0.9;
+      const specialistsScrollStart = specialistsSectionTop * 0.85;
+
+      if (scrollY <= heroScrollEnd) {
+        scrollProgress = 0;
+      } else if (scrollY < servicesScrollStart) {
+        scrollProgress = (scrollY - heroScrollEnd) / (servicesScrollStart - heroScrollEnd);
+      } else if (scrollY < servicesScrollEnd) {
+        const progressInServices = (scrollY - servicesScrollStart) / (servicesScrollEnd - servicesScrollStart);
+        scrollProgress = 0.2 + progressInServices * 0.6;
+      } else if (scrollY < specialistsScrollStart) {
+        scrollProgress = 0.8 + (scrollY - servicesScrollEnd) / (specialistsScrollStart - servicesScrollEnd) * 0.2;
+      } else {
+        scrollProgress = 1.0;
+      }
+      scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+
+      // Camera Z position logic (zoom into knot)
+      const zoomStart = 0.2;
+      const zoomEnd = 0.55;
+      const reassemblyStart = 0.7;
+      const reassemblyEnd = 0.9;
+
+      if (scrollProgress < zoomStart) {
+        cameraTargetZ = 4.6;
+      } else if (scrollProgress < zoomEnd) {
+        const zoomFactor = (scrollProgress - zoomStart) / (zoomEnd - zoomStart);
+        cameraTargetZ = THREE.MathUtils.lerp(4.6, 1.0, zoomFactor); // Zoom from 4.6 to 1.0
+      } else if (scrollProgress < reassemblyStart) {
+        cameraTargetZ = 1.0; // Stay zoomed in
+      } else if (scrollProgress < reassemblyEnd) {
+        const reassemblyFactor = (scrollProgress - reassemblyStart) / (reassemblyEnd - reassemblyStart);
+        cameraTargetZ = THREE.MathUtils.lerp(1.0, 4.6, reassemblyFactor); // Zoom out from 1.0 to 4.6
+      } else {
+        cameraTargetZ = 4.6;
+      }
+
+      // Wireframe state logic based on scroll progress
+      const wireframeActivationStart = 0.25;
+      const wireframeDeactivationStart = 0.75;
+
+      if (scrollProgress >= wireframeActivationStart && scrollProgress < wireframeDeactivationStart && !isWireframeActive) {
+        material.wireframe = true;
+        isWireframeActive = true;
+      } else if ((scrollProgress < wireframeActivationStart || scrollProgress >= wireframeDeactivationStart) && isWireframeActive) {
+        material.wireframe = false;
+        isWireframeActive = false;
+      }
+    });
+
+    let currentCameraZ = 4.6;
+
+    // Animation loop
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.008;
+
+      // Smooth mouse tracking rotation
+      targetRotY = mouseX * 0.6;
+      targetRotX = mouseY * -0.3;
+      currentRotX = THREE.MathUtils.lerp(currentRotX, targetRotX, 0.06); // Higher dampening for fluidity
+      currentRotY = THREE.MathUtils.lerp(currentRotY, targetRotY, 0.06);
+
+      // Apply rotation with time-based oscillation for subtle movement
+      knotMesh.rotation.x = currentRotX + Math.sin(time * 0.8) * 0.12; // More pronounced wave
+      knotMesh.rotation.y = currentRotY + Math.cos(time * 0.5) * 0.12;
+      knotMesh.rotation.z = time * 0.06 + Math.sin(time * 1.2) * 0.06;
+
+      // Smoothly interpolate camera Z position
+      currentCameraZ = THREE.MathUtils.lerp(currentCameraZ, cameraTargetZ, 0.05);
+      camera.position.z = currentCameraZ;
+
+      // Dynamic light intensity for cosmic glow
+      dirLight1.intensity = 5.0 + Math.sin(time * 2.1) * 0.8;
+      dirLight2.intensity = 4.0 + Math.cos(time * 1.7 + 0.9) * 0.6;
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Handle window resizing
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    });
+
+    // Expose for potential integration if needed
+    window._lunarSpaceWebGL = { mesh: knotMesh, material, camera };
+  })();
+
+  // ============================================================
+  // PARTICLE SYSTEM — 2D CANVAS PARTICLES (Platinum & Cyan)
+  // ============================================================
+  (function initParticles() {
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const PARTICLE_COUNT = 3500;
+    const particles = [];
+
+    const colors = ['#e5e4e1', '#e5e4e2', '#d0ced1', '#00f2fe']; // Platinum shades and Cyan
+
+    function randomBetween(a, b) {
+      return a + Math.random() * (b - a);
+    }
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      let color = colors[Math.floor(Math.random() * colors.length)];
+      particles.push({
+        x: randomBetween(0, canvas.width),
+        y: randomBetween(0, canvas.height),
+        baseX: randomBetween(0, canvas.width),
+        baseY: randomBetween(0, canvas.height),
+        vx: randomBetween(-0.1, 0.1),
+        vy: randomBetween(-0.1, 0.1),
+        size: randomBetween(0.8, 2.2), // Slightly larger particles
+        alpha: randomBetween(0.1, 0.5),
+        color: color,
+        speed: randomBetween(0.8, 3.5),
+        phase: randomBetween(0, Math.PI * 2),
+        // Properties for diagonal matrix mode
+        diagOffsetX: randomBetween(-50, 50),
+        diagOffsetY: randomBetween(-50, 50),
+        lineLength: randomBetween(50, 100)
+      });
+    }
+
+    let diagonalModeProgress = 0; // 0 = ambient, 1 = full diagonal matrix
+
+    window.addEventListener('scroll', updateDiagonalMode);
+
+    function updateDiagonalMode() {
+      const scrollY = window.scrollY;
+      const servicesEl = document.getElementById('services');
+      const specialistsEl = document.getElementById('specialists');
+      if (!servicesEl || !specialistsEl) return;
+
+      const servicesTop = servicesEl.offsetTop;
+      const specialistsTop = specialistsEl.offsetTop;
+
+      const scrollRangeStart = servicesTop;
+      const scrollRangeEnd = specialistsTop * 0.85;
+      const totalScrollRange = scrollRangeEnd - scrollRangeStart;
+
+      if (scrollY >= scrollRangeStart && scrollY < scrollRangeEnd) {
+        const progressInServices = (scrollY - scrollRangeStart) / totalScrollRange;
+        const activationStart = 0.08;
+        const activationEnd = 0.45;
+        const deactivationStart = 0.85;
+
+        if (progressInServices < activationStart) {
+          diagonalModeProgress = 0;
+        } else if (progressInServices < activationEnd) {
+          diagonalModeProgress = (progressInServices - activationStart) / (activationEnd - activationStart);
+        } else if (progressInServices < deactivationStart) {
+          diagonalModeProgress = 1;
+        } else {
+          diagonalModeProgress = 1 - (progressInServices - deactivationStart) / (1 - deactivationStart);
+        }
+      } else {
+        diagonalModeProgress = 0;
+      }
+      diagonalModeProgress = Math.max(0, Math.min(1, diagonalModeProgress));
+    }
+
+    let frameCount = 0;
+
+    function drawParticles() {
+      requestAnimationFrame(drawParticles);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      frameCount++;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        if (diagonalModeProgress < 0.02) { // Ambient drift mode
+          p.x += p.vx + Math.sin(frameCount * 0.018 + p.phase) * 0.5; // Faster, more pronounced wave
+          p.y += p.vy + Math.cos(frameCount * 0.018 + p.phase + 0.8) * 0.5;
+
+          if (p.x > canvas.width + p.size) p.x = -p.size;
+          if (p.x < -p.size) p.x = canvas.width + p.size;
+          if (p.y > canvas.height + p.size) p.y = -p.size;
+          if (p.y < -p.size) p.y = canvas.height + p.size;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha * 0.38; // Slightly more visible ambient particles
+          ctx.fill();
+          ctx.globalAlpha = 1;
+
+        } else { // Diagonal matrix mode - lines shooting up and right
+          const W = canvas.width;
+          const H = canvas.height;
+          const spread = Math.max(W, H) * 1.6; // Increased spread
+
+          let startX, startY;
+          if ((i % 4) === 0) {
+            startX = randomBetween(0, W * 0.7);
+            startY = H + 100;
+          } else if ((i % 4) === 1) {
+            startX = -100;
+            startY = randomBetween(0, H * 0.7);
+          } else if ((i % 4) === 2) {
+            startX = randomBetween(W * 0.3, W + 100);
+            startY = -100;
+          } else {
+            startX = W + 100;
+            startY = randomBetween(H * 0.3, H + 100);
+          }
+
+          const t = diagonalModeProgress;
+          const easedT = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const currentTravel = easedT * spread;
+
+          const lineEndX = startX + currentTravel + p.diagOffsetX;
+          const lineEndY = startY - currentTravel + p.diagOffsetY;
+
+          const grad = ctx.createLinearGradient(currentX, currentY, currentX + p.lineLength, currentY - p.lineLength);
+          grad.addColorStop(0, 'rgba(0, 242, 254, 0)'); // Cyan fade in
+          grad.addColorStop(0.4, p.color);
+          grad.addColorStop(1, 'rgba(0, 242, 254, 0)'); // Cyan fade out
+
+          ctx.beginPath();
+          ctx.moveTo(currentX, currentY);
+          ctx.lineTo(currentX + p.lineLength * easedT, currentY - p.lineLength * easedT);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = p.size * 0.7; // Slightly thicker lines
+          ctx.globalAlpha = p.alpha * (diagonalModeProgress * 0.8 + 0.2); // Glow intensity scales more
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+
+          p.x = currentX;
+          p.y = currentY;
+        }
+      }
+    }
+
+    drawParticles();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  })();
+
+  // ============================================================
+  // MATRIX CANVAS OVERLAY (Platinum-Cyan Diagonal Grid)
+  // ============================================================
+  (function initMatrixOverlay() {
+    const canvas = document.getElementById('matrix-overlay');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let matrixActiveProgress = 0;
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const servicesEl = document.getElementById('services');
+      const specialistsEl = document.getElementById('specialists');
+      if (!servicesEl || !specialistsEl) return;
+
+      const servicesTop = servicesEl.offsetTop;
+      const specialistsTop = specialistsEl.offsetTop;
+      const scrollRangeStart = servicesTop;
+      const scrollRangeEnd = specialistsTop * 0.85;
+
+      if (scrollY >= scrollRangeStart && scrollY < scrollRangeEnd) {
+        const progressInServices = (scrollY - scrollRangeStart) / (scrollRangeEnd - scrollRangeStart);
+        const activationStart = 0.08;
+        const activationEnd = 0.45;
+        const deactivationStart = 0.85;
+
+        if (progressInServices < activationStart) {
+          matrixActiveProgress = 0;
+        } else if (progressInServices < activationEnd) {
+          matrixActiveProgress = (progressInServices - activationStart) / (activationEnd - activationStart);
+        } else if (progressInServices < deactivationStart) {
+          matrixActiveProgress = 1;
+        } else {
+          matrixActiveProgress = 1 - (progressInServices - deactivationStart) / (1 - deactivationStart);
+        }
+      } else {
+        matrixActiveProgress = 0;
+      }
+      matrixActiveProgress = Math.max(0, Math.min(1, matrixActiveProgress));
+      canvas.style.opacity = (matrixActiveProgress * 0.4).toString(); // Fade overlay in/out, slightly stronger
+    });
+
+    let mt = 0;
+
+    function drawMatrix() {
+      requestAnimationFrame(drawMatrix);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (matrixActiveProgress < 0.02) return;
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const spacing = 75; // Slightly wider spacing for grid lines
+      const count = Math.ceil((W + H) / spacing) * 1.3;
+
+      ctx.lineWidth = 0.6; // Slightly thicker lines
+      mt += 0.5; // Faster movement
+
+      for (let i = -count; i < count * 2; i++) {
+        const offset = i * spacing + (mt % spacing);
+        const lineAlpha = 0.1 + matrixActiveProgress * 0.25; // Subtle cyan glow
+
+        ctx.beginPath();
+        ctx.moveTo(offset - H, H);
+        ctx.lineTo(offset + H, -H);
+        ctx.strokeStyle = `rgba(0, 242, 254, ${lineAlpha})`; // Cyan color
+        ctx.stroke();
+      }
+    }
+
+    drawMatrix();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  })();
+
+  // ============================================================
+  // DATA PULSE LABELS ANIMATION (Diagonal Travel)
+  // ============================================================
+  (function initDataPulses() {
+    const pulses = [
+      { el: document.getElementById('pulse-1'), delay: 0.0, color: '#00f2fe' },    // LUNAR NAILS (Cyan)
+      { el: document.getElementById('pulse-2'), delay: 0.8, color: '#e5e4e1' },    // LASH DESIGN (Platinum)
+      { el: document.getElementById('pulse-3'), delay: 1.6, color: '#87ceeb' },    // COSMIC HAIR (Sky blue)
+      { el: document.getElementById('pulse-4'), delay: 2.4, color: '#00f2fe' },    // LUNAR SPACE (Cyan)
+      { el: document.getElementById('pulse-5'), delay: 3.0, color: '#d0ced1' }     // ŠTEFÁNIKOVA 28 (Platinum dark)
+    ];
+
+    let pulsesActive = false;
+    let animationFrames = [];
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const servicesEl = document.getElementById('services');
+      const specialistsEl = document.getElementById('specialists');
+      if (!servicesEl || !specialistsEl) return;
+
+      const servicesTop = servicesEl.offsetTop;
+      const specialistsTop = specialistsEl.offsetTop;
+      const scrollRangeStart = servicesTop;
+      const scrollRangeEnd = specialistsTop * 0.85;
+
+      const isInActiveScrollRange = scrollY >= scrollRangeStart && scrollY < scrollRangeEnd;
+
+      if (isInActiveScrollRange && !pulsesActive) {
+        pulsesActive = true;
+        startPulseAnimations();
+      } else if (!isInActiveScrollRange && pulsesActive) {
+        pulsesActive = false;
+        stopPulseAnimations();
+      }
+    });
+
+    function stopPulseAnimations() {
+      pulses.forEach(p => {
+        p.el.style.opacity = '0';
+        p.el.style.transform = 'translate(-50%, -50%)';
+      });
+      animationFrames.forEach(frame => cancelAnimationFrame(frame));
+      animationFrames = [];
+    }
+
+    function startPulseAnimations() {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      function animatePulse(pulse, index) {
+        if (!pulsesActive) {
+          pulse.el.style.opacity = '0';
+          return;
+        }
+
+        const startX = W * 0.45 + Math.random() * W * 0.25; // wider spread
+        const startY = H * 0.65 + Math.random() * H * 0.25;
+        const duration = 3500 + Math.random() * 1500; // Slightly faster duration
+        const startTime = performance.now();
+
+        pulse.el.style.left = `${startX}px`;
+        pulse.el.style.top = `${startY}px`;
+        pulse.el.style.opacity = '0';
+        pulse.el.style.color = pulse.color;
+
+        function tick(now) {
+          if (!pulsesActive) {
+            pulse.el.style.opacity = '0';
+            return;
+          }
+          const elapsed = now - startTime;
+          const t = Math.min(1, elapsed / duration);
+
+          const easedT = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const travelDistance = Math.max(W, H) * 1.2; // Increased travel distance
+
+          const currentX = startX + easedT * travelDistance * 0.7;
+          const currentY = startY - easedT * travelDistance * 0.7;
+
+          pulse.el.style.left = `${currentX}px`;
+          pulse.el.style.top = `${currentY}px`;
+
+          let alpha = 0;
+          if (t < 0.1) alpha = t / 0.1;
+          else if (t > 0.8) alpha = (1 - t) / 0.2;
+          else alpha = 1;
+
+          pulse.el.style.opacity = (alpha * 0.8).toString(); // More visible pulses
+
+          if (t < 1) {
+            const frame = requestAnimationFrame(tick);
+            animationFrames.push(frame);
+          } else {
+            pulse.el.style.opacity = '0';
+            if (pulsesActive) {
+              setTimeout(() => animatePulse(pulse, index), 500 + Math.random() * 1000); // Faster respawn
+            }
+          }
+        }
+         const frame = requestAnimationFrame(tick);
+         animationFrames.push(frame);
+      }
+
+      pulses.forEach((p, i) => {
+        setTimeout(() => {
+          if (pulsesActive) animatePulse(p, i);
+        }, p.delay * 1000 + Math.random() * 500);
+      });
+    }
+  })();
+
+  // ============================================================
+  // GSAP SCROLLTRIGGER — KINETIC BENTO DIAGONAL FLOW
+  // ============================================================
+  (function initGSAP() {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const bentoWrapper = document.getElementById('bento-wrapper');
+
+    if (bentoWrapper) {
+      ScrollTrigger.create({
+        trigger: '#services',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 2.0, // Slower scrub for cinematic
+        pin: false,
+        onUpdate: (self) => {
+          const progress = self.progress;
+
+          const introStart = 0.0;
+          const introEnd = 0.15;
+          const moveStart = 0.15;
+          const moveEnd = 0.75;
+          const returnStart = 0.75;
+          const returnEnd = 0.90;
+          const finalPosition = 0.90;
+
+          const maxTravelX = window.innerWidth * 1.30;
+          const maxTravelY = -window.innerHeight * 1.30;
+
+          let currentX = 0, currentY = 0, currentOpacity = 1;
+
+          if (progress < moveStart) {
+            currentX = 0; currentY = 0; currentOpacity = 1;
+          } else if (progress < moveEnd) {
+            const travelProgress = (progress - moveStart) / (moveEnd - moveStart);
+            const easedProgress = GSAP.utils.easeInOut(travelProgress, 1.6); // Stronger ease for diagonal move
+
+            currentX = easedProgress * maxTravelX;
+            currentY = easedProgress * maxTravelY;
+            currentOpacity = 1 - easedProgress * 0.7; // Fade to 30% visibility
+          } else {
+            const returnProgress = (progress - moveEnd) / (1.0 - moveEnd);
+            const easedReturn = GSAP.utils.easeInOut(returnProgress, 1.6);
+
+            currentX = maxTravelX * (1 - easedReturn * 0.8);
+            currentY = maxTravelY * (1 - easedReturn * 0.8);
+            currentOpacity = 0.3 + easedReturn * 0.7; // Fade back to full opacity
+          }
+          gsap.set(bentoWrapper, { x: currentX, y: currentY, opacity: currentOpacity });
+        }
+      });
+    }
+
+    // Reveal animations for static elements
+    gsap.from('.services-header', {
+      scrollTrigger: { trigger: '#services', start: 'top 80%' },
+      y: 50, opacity: 0, duration: 1.2, ease: 'power3.out'
+    });
+
+    document.querySelectorAll('.bento-card').forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: 'top 92%', end: 'bottom 30%', toggleActions: 'play none none none' },
+        y: 80, opacity: 0, duration: 1.1, delay: i * 0.08, ease: 'power3.out'
+      });
+    });
+
+    document.querySelectorAll('.specialist-card').forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: 'top 90%', end: 'bottom 25%', toggleActions: 'play none none none' },
+        y: 60, opacity: 0, duration: 1.0, delay: i * 0.12, ease: 'power2.out'
+      });
+    });
+
+    document.querySelectorAll('.stat-item').forEach((item, i) => {
+      gsap.from(item, {
+        scrollTrigger: { trigger: item, start: 'top 88%', end: 'bottom 25%', toggleActions: 'play none none none' },
+        y: 50, opacity: 0, duration: 0.9, delay: i * 0.12, ease: 'power2.out'
+      });
+    });
+
+    document.querySelectorAll('.location-detail').forEach((item, i) => {
+      gsap.from(item, {
+        scrollTrigger: { trigger: item, start: 'top 90%', end: 'bottom 25%', toggleActions: 'play none none none' },
+        x: -50, opacity: 0, duration: 0.8, delay: i * 0.12, ease: 'power2.out'
+      });
+    });
+  })();
+
+  // ============================================================
+  // BENTO CARD HOVER EFFECT (Mouse Tilt)
+  // ============================================================
+  (function initTilt() {
+    const cards = document.querySelectorAll('[data-tilt]');
+
+    cards.forEach(card => {
+      let timeout;
+      const perspective = 1200;
+      const tiltZ = 25; // Push forward on tilt
+
+      card.addEventListener('mousemove', (e) => {
+        clearTimeout(timeout);
+        const rect = card.getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        const cardCenterX = rect.width / 2;
+        const cardCenterY = rect.height / 2;
+
+        const tiltX = (cx - cardCenterX) / cardCenterX * 10; // Max tilt 10 degrees
+        const tiltY = (cy - cardCenterY) / cardCenterY * -10; // Inverse Y axis
+
+        card.style.transform = `perspective(${perspective}px) rotateX(${tiltY}deg) rotateY(${tiltX}deg) translateZ(${tiltZ}px)`;
+        card.style.transition = 'transform 0.1s ease-out';
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)'; // Smoother return
+        card.style.transform = `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) translateZ(0px)`;
+
+        timeout = setTimeout(() => {
+          card.style.transition = '';
+        }, 800);
+      });
+    });
+  })();
+
+  // ============================================================
+  // INTERSECTION OBSERVER FOR FADE-UP REVEAL ANIMATIONS
+  // ============================================================
+  (function initRevealComponents() {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px' // Trigger earlier for better flow
+    });
+
+    document.querySelectorAll('.reveal-up').forEach(el => {
+      revealObserver.observe(el);
+    });
+  })();
+
+  // ============================================================
+  // NAVBAR SCROLL BEHAVIOR
+  // ============================================================
+  (function initNavbarScroll() {
+    const navbar = document.getElementById('navbar');
+    const headerHeight = document.getElementById('hero').offsetHeight;
+    const scrollThreshold = headerHeight * 0.4;
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > scrollThreshold) {
+        navbar.style.background = 'rgba(8,8,12,0.98)'; // Darker, more opaque background
+        navbar.style.borderBottomColor = 'rgba(0, 242, 254, 0.35)'; // Stronger cyan border
+      } else {
+        navbar.style.background = 'rgba(8,8,12,0.6)';
+        navbar.style.borderBottomColor = 'rgba(0, 242, 254, 0.2)';
+      }
+    });
+  })();
+
+  // ============================================================
+  // SMOOTH ANCHOR SCROLLING
+  // ============================================================
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const linkTarget = this.getAttribute('href');
+      const targetElement = document.querySelector(linkTarget);
+
+      if (targetElement) {
+        e.preventDefault();
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+
+  </script>
+</body>
+</html>
